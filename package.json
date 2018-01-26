@@ -1,5 +1,5 @@
 {
-  "name": "paintbricks,
+  "name": "paintbricks",
   "version": "0.0.1",
   "description": "An extendable drawing system built for the web.",
   "main": "lib/index.js",

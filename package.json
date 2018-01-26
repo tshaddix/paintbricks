@@ -1,10 +1,11 @@
 {
-  "name": "fingerpaint",
+  "name": "paintbricks,
   "version": "0.0.1",
   "description": "Canvas experiment that encourages painting with your fingers.",
   "main": "lib/index.js",
   "devDependencies": {
     "awesome-typescript-loader": "^3.4.1",
+    "prettier": "^1.10.2",
     "source-map-loader": "^0.2.3",
     "typescript": "^2.6.2",
     "webpack": "^3.10.0"
@@ -17,14 +18,14 @@
   "typings": "src/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tshaddix/fingerpaint.git"
+    "url": "git+https://github.com/tshaddix/paintbricks.git"
   },
   "author": "Tyler Shaddix <tylershaddix@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tshaddix/fingerpaint/issues"
+    "url": "https://github.com/tshaddix/paintbricks/issues"
   },
-  "homepage": "https://github.com/tshaddix/fingerpaint#readme",
+  "homepage": "https://github.com/tshaddix/paintbricks#readme",
   "dependencies": {
     "parse-color": "^1.0.0"
   }

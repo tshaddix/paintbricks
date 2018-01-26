@@ -1,5 +1,5 @@
-import {IPoint, IStrokePart, ITool} from "./types";
-import {StrokeManager} from "./StrokeManager";
+import { IPoint, IStrokePart, ITool } from "./types";
+import { StrokeManager } from "./StrokeManager";
 
 export class Manager {
   // reference to the canvas
@@ -19,34 +19,38 @@ export class Manager {
   private currentTool: ITool | null;
   // holds all strokes that have not been drawn
   private nextStrokes: IStrokePart[];
-  
-  constructor (canvas: HTMLCanvasElement, canvasWidth: number, canvasHeight: number) {
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    canvasWidth: number,
+    canvasHeight: number
+  ) {
     this.canvas = canvas;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.currentTool = null;
     this.nextStrokes = [];
     this.strokeManager = new StrokeManager(canvas);
-    
+
     // find pixel ratio relative to backing store and device ratio
     const bsr = (canvas.getContext("2d") as any).backingStorePixelRatio || 1;
     const dpr = window.devicePixelRatio || 1;
     this.pixelRatio = dpr / bsr;
-    
+
     this.setCanvasSize = this.setCanvasSize.bind(this);
     this.setTool = this.setTool.bind(this);
     this.destroy = this.destroy.bind(this);
     this.draw = this.draw.bind(this);
     this.onStrokePart = this.onStrokePart.bind(this);
-    
+
     // schedule animation frame loop
     this.nextAnimationFrame = window.requestAnimationFrame(this.draw);
     // set up listener for new stroke part
     this.strokeManager.onStrokePart(this.onStrokePart);
-    
+
     this.setCanvasSize(canvasWidth, canvasHeight);
   }
-  
+
   /**
    * Sets the canvas desired width and height and sets transform
    * for hifi displays
@@ -68,7 +72,7 @@ export class Manager {
     canvas.style.height = canvasHeight + "px";
     ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   }
-  
+
   /**
    * Sets the current tool for the manager
    * @param tool
@@ -76,7 +80,7 @@ export class Manager {
   public setTool(tool: ITool): void {
     this.currentTool = tool;
   }
-  
+
   /**
    * Remove all event listeners
    */
@@ -86,7 +90,7 @@ export class Manager {
     // remove all listeners on stroke manager
     this.strokeManager.destroy();
   }
-  
+
   /**
    * Adds a new stroke part to the nextStrokes
    * array
@@ -95,27 +99,27 @@ export class Manager {
   private onStrokePart(strokePart: IStrokePart): void {
     this.nextStrokes.push(strokePart);
   }
-  
+
   /**
    * Draws a frame
    */
-  private draw (): void {
+  private draw(): void {
     // schedule next draw
     this.nextAnimationFrame = window.requestAnimationFrame(this.draw);
-    
+
     const ctx = this.canvas.getContext("2d");
-    
+
     // if a tool has been selected and there are
     // pending strokes, draw them
     if (this.currentTool && this.nextStrokes) {
       ctx.save();
-      
+
       this.nextStrokes.forEach(stroke => {
         this.currentTool.draw(ctx, stroke);
       });
-      
+
       this.nextStrokes = [];
-      
+
       ctx.restore();
     }
   }

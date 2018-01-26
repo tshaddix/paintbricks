@@ -75,24 +75,19 @@ window.onload = function () {
     const canvas = document.getElementById("canvas");
     const redPenElem = document.getElementById("red-pen");
     const bluePenElem = document.getElementById("blue-pen");
-    const highlighterElem = document.getElementById("highlighter");
     const eraserElem = document.getElementById("eraser");
     const width = 400;
     const height = 400;
     const manager = new lib_1.Manager(canvas, width, height);
     const redPen = new lib_1.PenTool("red", 3);
     const bluePen = new lib_1.PenTool("blue", 8);
-    const highlighter = new lib_1.HighlighterTool("yellow", 30);
-    const eraser = new lib_1.EraserTool(10);
+    const eraser = new lib_1.EraserTool(20, { fillColor: "red" });
     manager.setTool(redPen);
     redPenElem.onclick = function () {
         manager.setTool(redPen);
     };
     bluePenElem.onclick = function () {
         manager.setTool(bluePen);
-    };
-    highlighterElem.onclick = function () {
-        manager.setTool(highlighter);
     };
     eraserElem.onclick = function () {
         manager.setTool(eraser);
@@ -311,10 +306,18 @@ class StrokeManager {
         this.onTouchMove = this.onTouchMove.bind(this);
         this.destroy = this.destroy.bind(this);
         this.getRelativePosition = this.getRelativePosition.bind(this);
-        this.canvas.addEventListener("touchstart", this.onTouchStart, { passive: false });
-        this.canvas.addEventListener("touchend", this.onTouchEnd, { passive: false });
-        this.canvas.addEventListener("touchcancel", this.onTouchCancel, { passive: false });
-        this.canvas.addEventListener("touchmove", this.onTouchMove, { passive: false });
+        this.canvas.addEventListener("touchstart", this.onTouchStart, {
+            passive: false
+        });
+        this.canvas.addEventListener("touchend", this.onTouchEnd, {
+            passive: false
+        });
+        this.canvas.addEventListener("touchcancel", this.onTouchCancel, {
+            passive: false
+        });
+        this.canvas.addEventListener("touchmove", this.onTouchMove, {
+            passive: false
+        });
     }
     /**
      * Registers a handler to be fired on a new stroke part
@@ -405,7 +408,8 @@ class StrokeManager {
         // check if this point is far enough from last
         // touch to be drawn
         if (this.sensitivity &&
-            this.getEuclidean(nextTouch.position, this.lastTouch.position) < (10.0 / this.sensitivity)) {
+            this.getEuclidean(nextTouch.position, this.lastTouch.position) <
+                10.0 / this.sensitivity) {
             return;
         }
         const strokePart = {
@@ -492,13 +496,8 @@ class PenTool {
         ctx.lineTo(endPoint.x, endPoint.y);
         ctx.lineWidth = this.width;
         ctx.strokeStyle = this.color;
+        ctx.lineCap = "round";
         ctx.stroke();
-        [startPoint, endPoint].forEach(capPoint => {
-            ctx.beginPath();
-            ctx.arc(capPoint.x, capPoint.y, this.width / 2, 0, 2 * Math.PI, false);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-        });
     }
 }
 exports.PenTool = PenTool;
@@ -512,8 +511,26 @@ exports.PenTool = PenTool;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 class EraserTool {
-    constructor(width = 10) {
+    constructor(width = 10, handleOpts) {
         this.width = width;
+        this.lastEndPoint = null;
+        handleOpts = handleOpts || {};
+        this.handleOpts = {
+            hide: handleOpts.hide || false,
+            strokeWidth: handleOpts.strokeWidth || 2,
+            fillColor: handleOpts.fillColor || "white",
+            strokeColor: handleOpts.strokeColor || "black"
+        };
+        this.getEuclidean = this.getEuclidean.bind(this);
+    }
+    /**
+     * Get the distance between two points
+     * @param p1
+     * @param p2
+     * @returns number
+     */
+    getEuclidean(p1, p2) {
+        return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
     /**
      * Draws an "eraser stroke" for all line segments
@@ -521,8 +538,50 @@ class EraserTool {
      * @param strokePart
      */
     draw(ctx, strokePart) {
-        const { startPoint, endPoint } = strokePart;
-        // todo Move along the line using clear react
+        const { startPoint, endPoint, isEnd } = strokePart;
+        const { handleOpts } = this;
+        const halfWidth = this.width / 2.0;
+        const length = this.getEuclidean(startPoint, endPoint);
+        const dirVect = {
+            x: endPoint.x - startPoint.x,
+            y: endPoint.y - startPoint.y
+        };
+        const unitVect = {
+            x: dirVect.x / length,
+            y: dirVect.y / length
+        };
+        let currentPoint = startPoint;
+        let i = 0;
+        // clean up tool handle from 
+        // last draw if exists and we are not hiding
+        if (this.lastEndPoint && !handleOpts.hide) {
+            ctx.clearRect(this.lastEndPoint.x - halfWidth - 1, this.lastEndPoint.y - halfWidth - 1, this.width + 2, this.width + 2);
+        }
+        // clear all the way along the drag
+        while (i < length) {
+            const nextPoint = {
+                x: currentPoint.x + unitVect.x,
+                y: currentPoint.y + unitVect.y
+            };
+            ctx.clearRect(nextPoint.x - halfWidth, nextPoint.y - halfWidth, this.width, this.width);
+            i++;
+            currentPoint = nextPoint;
+        }
+        // if not the last part, then draw
+        // the tool indicator at the endpoint
+        if (!isEnd) {
+            this.lastEndPoint = endPoint;
+            // draw handle
+            if (!handleOpts.hide) {
+                ctx.strokeStyle = handleOpts.strokeColor;
+                ctx.fillStyle = handleOpts.fillColor;
+                ctx.fillRect(endPoint.x - halfWidth, endPoint.y - halfWidth, this.width, this.width);
+                ctx.strokeRect(endPoint.x - halfWidth + 0.5, endPoint.y - halfWidth + 0.5, this.width - 1, this.width - 1);
+            }
+        }
+        else {
+            this.lastEndPoint = null;
+        }
     }
 }
 exports.EraserTool = EraserTool;
@@ -585,7 +644,7 @@ class HighlighterTool {
             ctx.rotate(lineAngle);
             capPoints.forEach(capPoint => {
                 ctx.fillStyle = this.color;
-                ctx.fillRect(capPoint.x - (this.width / 2.0), capPoint.y - (this.width / 2.0), this.width, this.width);
+                ctx.fillRect(capPoint.x - this.width / 2.0, capPoint.y - this.width / 2.0, this.width, this.width);
             });
             ctx.rotate(-lineAngle);
         }

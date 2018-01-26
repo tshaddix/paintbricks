@@ -22,13 +22,7 @@ export class PenTool {
     ctx.lineTo(endPoint.x, endPoint.y);
     ctx.lineWidth = this.width;
     ctx.strokeStyle = this.color;
+    ctx.lineCap = "round";
     ctx.stroke();
-
-    [startPoint, endPoint].forEach(capPoint => {
-      ctx.beginPath();
-      ctx.arc(capPoint.x, capPoint.y, this.width / 2, 0, 2 * Math.PI, false);
-      ctx.fillStyle = this.color;
-      ctx.fill();
-    });
   }
 }

@@ -17,7 +17,7 @@ window.onload = function () {
   
   const redPen = new PenTool("red", 3);
   const bluePen = new PenTool("blue", 8);
-  const eraser = new EraserTool(10);
+  const eraser = new EraserTool(20, {fillColor: "red"});
   
   manager.setTool(redPen);
   

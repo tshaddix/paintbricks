@@ -1,0 +1,31 @@
+{
+  "name": "fingerpaint",
+  "version": "0.0.1",
+  "description": "Canvas experiment that encourages painting with your fingers.",
+  "main": "lib/index.js",
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.4.1",
+    "source-map-loader": "^0.2.3",
+    "typescript": "^2.6.2",
+    "webpack": "^3.10.0"
+  },
+  "scripts": {
+    "build": "./node_modules/.bin/webpack --config webpack.config.js",
+    "build-example": "./node_modules/.bin/webpack --config example/webpack.config.js",
+    "format": "./node_modules/.bin/prettier es6 --write \"{src/**/*.ts,webpack.config.js}\""
+  },
+  "typings": "src/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tshaddix/fingerpaint.git"
+  },
+  "author": "Tyler Shaddix <tylershaddix@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tshaddix/fingerpaint/issues"
+  },
+  "homepage": "https://github.com/tshaddix/fingerpaint#readme",
+  "dependencies": {
+    "parse-color": "^1.0.0"
+  }
+}

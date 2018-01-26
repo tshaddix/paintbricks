@@ -1,7 +1,7 @@
 {
   "name": "paintbricks,
   "version": "0.0.1",
-  "description": "Canvas experiment that encourages painting with your fingers.",
+  "description": "An extendable drawing system built for the web.",
   "main": "lib/index.js",
   "devDependencies": {
     "awesome-typescript-loader": "^3.4.1",

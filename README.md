@@ -1,16 +1,16 @@
-# fingerpaint
-Canvas experiment that encourages painting with your fingers.
+# paintbricks
+An extendable drawing system built for the web.
 
 ## Install
 ```
-npm install --save fingerpaint
+npm install --save paintbricks
 ```
 
 ## Usage
 
 ```js
 // import manager and tool
-import {Manager, PenTool} from "fingerpaint";
+import {Manager, PenTool} from "paintbricks";
 
 // Create a new manager
 const manager = new Manager(canvasElem, canvasWidth, canvasHeight);

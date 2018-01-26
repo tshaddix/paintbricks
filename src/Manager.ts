@@ -40,6 +40,7 @@ export class Manager {
     this.setCanvasSize = this.setCanvasSize.bind(this);
     this.setTool = this.setTool.bind(this);
     this.destroy = this.destroy.bind(this);
+    this.clear = this.clear.bind(this);
     this.draw = this.draw.bind(this);
     this.onStrokePart = this.onStrokePart.bind(this);
 
@@ -89,6 +90,14 @@ export class Manager {
     window.cancelAnimationFrame(this.nextAnimationFrame);
     // remove all listeners on stroke manager
     this.strokeManager.destroy();
+  }
+  
+  /**
+   * Clears the canvas
+   */
+  public clear(): void {
+    const ctx = this.canvas.getContext("2d");
+    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
   }
 
   /**

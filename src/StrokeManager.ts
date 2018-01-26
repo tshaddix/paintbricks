@@ -1,4 +1,5 @@
 import { IPoint, IStrokePart } from "./types";
+import {getEuclidean} from "./util";
 
 export interface IOnStrokePartHandler {
   (strokePart: IStrokePart): void;
@@ -24,7 +25,7 @@ export class StrokeManager {
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.lastTouch = null;
-    this.sensitivity = 0.0;
+    this.sensitivity = 20.0;
     this.lastStrokeParts = [];
     this.onStrokePartHandlers = [];
 
@@ -82,16 +83,6 @@ export class StrokeManager {
       x: clientX - rect.left,
       y: clientY - rect.top
     };
-  }
-
-  /**
-   * Get the distance between two points
-   * @param p1
-   * @param p2
-   * @returns number
-   */
-  private getEuclidean(p1: IPoint, p2: IPoint): number {
-    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
   }
 
   /**
@@ -155,7 +146,7 @@ export class StrokeManager {
     // touch to be drawn
     if (
       this.sensitivity &&
-      this.getEuclidean(nextTouch.position, this.lastTouch.position) <
+      getEuclidean(nextTouch.position, this.lastTouch.position) <
         10.0 / this.sensitivity
     ) {
       return;

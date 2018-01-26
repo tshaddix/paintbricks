@@ -1,7 +1,8 @@
 import {
   Manager,
   PenTool,
-  EraserTool
+  EraserTool,
+  HighlighterTool
 } from "../../lib";
 
 window.onload = function () {
@@ -9,6 +10,8 @@ window.onload = function () {
   const redPenElem = document.getElementById("red-pen");
   const bluePenElem = document.getElementById("blue-pen");
   const eraserElem = document.getElementById("eraser");
+  const highlighterElem = document.getElementById("highlighter");
+  const clearElem = document.getElementById("clear");
   
   const width = 400;
   const height = 400;
@@ -17,7 +20,8 @@ window.onload = function () {
   
   const redPen = new PenTool("red", 3);
   const bluePen = new PenTool("blue", 8);
-  const eraser = new EraserTool(20, {fillColor: "red"});
+  const eraser = new EraserTool(20);
+  const highlighterTool = new HighlighterTool("yellow", 30);
   
   manager.setTool(redPen);
   
@@ -31,5 +35,13 @@ window.onload = function () {
   
   eraserElem.onclick = function() {
     manager.setTool(eraser);
+  };
+  
+  highlighterElem.onclick = function() {
+    manager.setTool(highlighterTool);
+  };
+  
+  clearElem.onclick = function() {
+    manager.clear();
   };
 };

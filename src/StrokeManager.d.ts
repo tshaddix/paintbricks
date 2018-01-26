@@ -30,13 +30,6 @@ export declare class StrokeManager {
      */
     private getRelativePosition(clientX, clientY);
     /**
-     * Get the distance between two points
-     * @param p1
-     * @param p2
-     * @returns number
-     */
-    private getEuclidean(p1, p2);
-    /**
      * Creates a new touch if one does not
      * already exist
      * @param e

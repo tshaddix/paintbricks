@@ -11,13 +11,6 @@ export declare class EraserTool {
     private lastEndPoint;
     constructor(width?: number, handleOpts?: Partial<IHandleOptions>);
     /**
-     * Get the distance between two points
-     * @param p1
-     * @param p2
-     * @returns number
-     */
-    private getEuclidean(p1, p2);
-    /**
      * Draws an "eraser stroke" for all line segments
      * @param ctx
      * @param strokePart

@@ -26,6 +26,10 @@ export declare class Manager {
      */
     destroy(): void;
     /**
+     * Clears the canvas
+     */
+    clear(): void;
+    /**
      * Adds a new stroke part to the nextStrokes
      * array
      * @param strokePart

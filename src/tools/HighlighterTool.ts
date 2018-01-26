@@ -1,10 +1,12 @@
 import * as parseColor from "parse-color";
 
 import { IStrokePart, IPoint } from "../types";
+import {getUnitVector, getEuclidean} from "../util";
 
 export class HighlighterTool {
   readonly color: string;
   readonly width: number;
+  private lastStrokePart: IStrokePart | null;
 
   constructor(
     color: string = "yellow",
@@ -12,6 +14,7 @@ export class HighlighterTool {
     opacity: Number = 0.3
   ) {
     this.width = width;
+    this.lastStrokePart = null;
 
     // calculate rgba color w/ opacity
     const { rgb } = parseColor(color);
@@ -25,59 +28,47 @@ export class HighlighterTool {
    */
   public draw(ctx: CanvasRenderingContext2D, strokePart: IStrokePart): void {
     const { startPoint, endPoint, isStart, isEnd } = strokePart;
+    const {lastStrokePart} = this;
 
     ctx.beginPath();
-    ctx.moveTo(startPoint.x, startPoint.y);
-    ctx.lineTo(endPoint.x, endPoint.y);
+    
+    if (lastStrokePart) {
+      // get the vector direction of last stroke
+      const lastUnitVec = getUnitVector(lastStrokePart.startPoint, lastStrokePart.endPoint);
+      const lastLength = getEuclidean(lastStrokePart.startPoint, lastStrokePart.endPoint);
+      const lastBufferAmount = Math.min(1.0, lastLength);
+      
+      // move to the buffer point of last stroke
+      ctx.moveTo(endPoint.x - lastUnitVec.x * lastBufferAmount, endPoint.y - lastUnitVec.y * lastBufferAmount);
+      ctx.lineTo(startPoint.x, startPoint.y);
+      
+      // only move to buffer
+      const nextUnitVec = getUnitVector(startPoint, endPoint);
+      const nextLength = getEuclidean(startPoint, endPoint);
+      const nextBufferAmount = Math.min(1.0, nextLength);
+      
+      const bufferEndPoint = {
+        x: startPoint.x + nextUnitVec.x * (nextLength - nextBufferAmount),
+        y: startPoint.y + nextUnitVec.y * (nextLength - nextBufferAmount)
+      };
+      
+      ctx.lineTo(bufferEndPoint.x, bufferEndPoint.y);
+    } else {
+      ctx.moveTo(startPoint.x, startPoint.y);
+      ctx.lineTo(endPoint.x, endPoint.y);
+    }
+    
     ctx.lineWidth = this.width;
     ctx.strokeStyle = this.color;
     ctx.stroke();
-
-    // join points draw circles where line segments will join
-    const joinPoints: IPoint[] = [];
-    // cap point draw square end caps to simulate a highlighter
-    const capPoints: IPoint[] = [];
-
-    if (!isStart) {
-      joinPoints.push(startPoint);
+    
+    // if this is the last part,
+    // remove the last stroke part
+    // ref as there will be no more
+    if (isEnd) {
+      this.lastStrokePart = null;
     } else {
-      capPoints.push(startPoint);
-    }
-
-    if (!isEnd) {
-      joinPoints.push(endPoint);
-    } else {
-      capPoints.push(endPoint);
-    }
-
-    joinPoints.forEach(joinPoint => {
-      ctx.beginPath();
-      ctx.arc(joinPoint.x, joinPoint.y, this.width / 2, 0, 2 * Math.PI, false);
-      ctx.fillStyle = this.color;
-      ctx.fill();
-    });
-
-    // if there are end points, then add a square end point
-    if (capPoints.length) {
-      // get the angle of the line (radians)
-      const lineAngle = Math.atan2(
-        endPoint.y - startPoint.y,
-        endPoint.x - startPoint.x
-      );
-
-      ctx.rotate(lineAngle);
-
-      capPoints.forEach(capPoint => {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(
-          capPoint.x - this.width / 2.0,
-          capPoint.y - this.width / 2.0,
-          this.width,
-          this.width
-        );
-      });
-
-      ctx.rotate(-lineAngle);
+      this.lastStrokePart = strokePart;
     }
   }
 }

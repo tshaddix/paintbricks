@@ -1,4 +1,5 @@
 import { IStrokePart, IPoint } from "../types";
+import {getUnitVector} from "../util";
 
 export interface IHandleOptions {
   hide: boolean;
@@ -24,18 +25,6 @@ export class EraserTool {
       fillColor: handleOpts.fillColor || "white",
       strokeColor: handleOpts.strokeColor || "black"
     };
-    
-    this.getEuclidean = this.getEuclidean.bind(this);
-  }
-  
-  /**
-   * Get the distance between two points
-   * @param p1
-   * @param p2
-   * @returns number
-   */
-  private getEuclidean(p1: IPoint, p2: IPoint): number {
-    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
   }
 
   /**
@@ -48,18 +37,8 @@ export class EraserTool {
     const { handleOpts } = this;
 
     const halfWidth = this.width / 2.0;
-    const length = this.getEuclidean(startPoint, endPoint);
     
-    const dirVect = {
-      x: endPoint.x - startPoint.x,
-      y: endPoint.y - startPoint.y
-    };
-    
-    const unitVect = {
-      x: dirVect.x / length,
-      y: dirVect.y / length
-    };
-    
+    const unitVect: IPoint = getUnitVector(startPoint, endPoint);
     let currentPoint: IPoint = startPoint;
     let i = 0;
     

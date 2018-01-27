@@ -12,17 +12,25 @@ export class PenTool {
   /**
    * Draws a "pen stroke" for all line segments
    * @param ctx
-   * @param strokePart
+   * @param strokeParts
    */
-  public draw(ctx: CanvasRenderingContext2D, strokePart: IStrokePart): void {
-    const { startPoint, endPoint, isStart, isEnd } = strokePart;
+  public draw(ctx: CanvasRenderingContext2D, strokeParts: IStrokePart[]): void {
+    const firstPart = strokeParts[0];
 
     ctx.beginPath();
-    ctx.moveTo(startPoint.x, startPoint.y);
-    ctx.lineTo(endPoint.x, endPoint.y);
+
     ctx.lineWidth = this.width;
     ctx.strokeStyle = this.color;
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    ctx.moveTo(firstPart.startPoint.x, firstPart.startPoint.y);
+
+    strokeParts.forEach(strokePart => {
+      const { endPoint } = strokePart;
+      ctx.lineTo(endPoint.x, endPoint.y);
+    });
+
     ctx.stroke();
   }
 }

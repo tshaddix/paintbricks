@@ -17,8 +17,14 @@ export class Manager {
   private nextAnimationFrame: number;
   // the currently selected tool
   private currentTool: ITool | null;
-  // holds all strokes that have not been drawn
-  private nextStrokes: IStrokePart[];
+  // holds stroke parts for ongoing stroke
+  private currentStroke: IStrokePart[];
+  // the state of the canvas (not including ongoing stroke)
+  private canvasState: ImageData | null;
+  // indicates whether changes have occured that require redraw
+  private shouldDraw: boolean;
+  // indicates whether canvas should commit its next draw state to current state
+  private shouldCommit: boolean;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -29,8 +35,11 @@ export class Manager {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.currentTool = null;
-    this.nextStrokes = [];
+    this.currentStroke = [];
     this.strokeManager = new StrokeManager(canvas);
+    this.canvasState = null;
+    this.shouldDraw = false;
+    this.shouldCommit = false;
 
     // find pixel ratio relative to backing store and device ratio
     const bsr = (canvas.getContext("2d") as any).backingStorePixelRatio || 1;
@@ -91,13 +100,15 @@ export class Manager {
     // remove all listeners on stroke manager
     this.strokeManager.destroy();
   }
-  
+
   /**
    * Clears the canvas
    */
   public clear(): void {
-    const ctx = this.canvas.getContext("2d");
-    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    this.canvasState = null;
+    this.currentStroke = [];
+    this.shouldDraw = true;
+    this.shouldCommit = true;
   }
 
   /**
@@ -106,7 +117,13 @@ export class Manager {
    * @param strokePart
    */
   private onStrokePart(strokePart: IStrokePart): void {
-    this.nextStrokes.push(strokePart);
+    this.currentStroke.push(strokePart);
+
+    this.shouldDraw = true;
+
+    if (strokePart.isEnd) {
+      this.shouldCommit = true;
+    }
   }
 
   /**
@@ -118,18 +135,39 @@ export class Manager {
 
     const ctx = this.canvas.getContext("2d");
 
+    if (!this.shouldDraw) {
+      return;
+    }
+
+    // clear canvas
+    ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    // draw current state
+    if (this.canvasState) {
+      ctx.putImageData(this.canvasState, 0, 0);
+    }
+
     // if a tool has been selected and there are
     // pending strokes, draw them
-    if (this.currentTool && this.nextStrokes) {
+    if (this.currentTool && this.currentStroke.length) {
       ctx.save();
-
-      this.nextStrokes.forEach(stroke => {
-        this.currentTool.draw(ctx, stroke);
-      });
-
-      this.nextStrokes = [];
-
+      this.currentTool.draw(ctx, this.currentStroke);
       ctx.restore();
     }
+
+    // if all changes have been made for current stroke,
+    // save it as the new canvas state
+    if (this.shouldCommit) {
+      this.canvasState = ctx.getImageData(
+        0,
+        0,
+        this.canvasWidth * this.pixelRatio,
+        this.canvasHeight * this.pixelRatio
+      );
+      this.currentStroke = [];
+      this.shouldCommit = false;
+    }
+
+    this.shouldDraw = false;
   }
 }

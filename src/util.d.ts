@@ -13,4 +13,7 @@ export declare function getEuclidean(p1: IPoint, p2: IPoint): number;
  * @param endPoint
  * @returns IPoint
  */
-export declare function getUnitVector(startPoint: IPoint, endPoint: IPoint): IPoint;
+export declare function getUnitVector(
+  startPoint: IPoint,
+  endPoint: IPoint
+): IPoint;

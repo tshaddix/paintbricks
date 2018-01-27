@@ -1,5 +1,5 @@
 import { IPoint, IStrokePart } from "./types";
-import {getEuclidean} from "./util";
+import { getEuclidean } from "./util";
 
 export interface IOnStrokePartHandler {
   (strokePart: IStrokePart): void;

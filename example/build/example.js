@@ -253,8 +253,11 @@ class Manager {
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
         this.currentTool = null;
-        this.nextStrokes = [];
+        this.currentStroke = [];
         this.strokeManager = new StrokeManager_1.StrokeManager(canvas);
+        this.canvasState = null;
+        this.shouldDraw = false;
+        this.shouldCommit = false;
         // find pixel ratio relative to backing store and device ratio
         const bsr = canvas.getContext("2d").backingStorePixelRatio || 1;
         const dpr = window.devicePixelRatio || 1;
@@ -309,8 +312,10 @@ class Manager {
      * Clears the canvas
      */
     clear() {
-        const ctx = this.canvas.getContext("2d");
-        ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.canvasState = null;
+        this.currentStroke = [];
+        this.shouldDraw = true;
+        this.shouldCommit = true;
     }
     /**
      * Adds a new stroke part to the nextStrokes
@@ -318,7 +323,11 @@ class Manager {
      * @param strokePart
      */
     onStrokePart(strokePart) {
-        this.nextStrokes.push(strokePart);
+        this.currentStroke.push(strokePart);
+        this.shouldDraw = true;
+        if (strokePart.isEnd) {
+            this.shouldCommit = true;
+        }
     }
     /**
      * Draws a frame
@@ -327,16 +336,30 @@ class Manager {
         // schedule next draw
         this.nextAnimationFrame = window.requestAnimationFrame(this.draw);
         const ctx = this.canvas.getContext("2d");
+        if (!this.shouldDraw) {
+            return;
+        }
+        // clear canvas
+        ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        // draw current state
+        if (this.canvasState) {
+            ctx.putImageData(this.canvasState, 0, 0);
+        }
         // if a tool has been selected and there are
         // pending strokes, draw them
-        if (this.currentTool && this.nextStrokes) {
+        if (this.currentTool && this.currentStroke.length) {
             ctx.save();
-            this.nextStrokes.forEach(stroke => {
-                this.currentTool.draw(ctx, stroke);
-            });
-            this.nextStrokes = [];
+            this.currentTool.draw(ctx, this.currentStroke);
             ctx.restore();
         }
+        // if all changes have been made for current stroke,
+        // save it as the new canvas state
+        if (this.shouldCommit) {
+            this.canvasState = ctx.getImageData(0, 0, this.canvasWidth * this.pixelRatio, this.canvasHeight * this.pixelRatio);
+            this.currentStroke = [];
+            this.shouldCommit = false;
+        }
+        this.shouldDraw = false;
     }
 }
 exports.Manager = Manager;
@@ -535,16 +558,20 @@ class PenTool {
     /**
      * Draws a "pen stroke" for all line segments
      * @param ctx
-     * @param strokePart
+     * @param strokeParts
      */
-    draw(ctx, strokePart) {
-        const { startPoint, endPoint, isStart, isEnd } = strokePart;
+    draw(ctx, strokeParts) {
+        const firstPart = strokeParts[0];
         ctx.beginPath();
-        ctx.moveTo(startPoint.x, startPoint.y);
-        ctx.lineTo(endPoint.x, endPoint.y);
         ctx.lineWidth = this.width;
         ctx.strokeStyle = this.color;
         ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.moveTo(firstPart.startPoint.x, firstPart.startPoint.y);
+        strokeParts.forEach(strokePart => {
+            const { endPoint } = strokePart;
+            ctx.lineTo(endPoint.x, endPoint.y);
+        });
         ctx.stroke();
     }
 }
@@ -574,44 +601,36 @@ class EraserTool {
     /**
      * Draws an "eraser stroke" for all line segments
      * @param ctx
-     * @param strokePart
+     * @param strokeParts
      */
-    draw(ctx, strokePart) {
-        const { startPoint, endPoint, isEnd } = strokePart;
+    draw(ctx, strokeParts) {
         const { handleOpts } = this;
         const halfWidth = this.width / 2.0;
-        const unitVect = util_1.getUnitVector(startPoint, endPoint);
-        let currentPoint = startPoint;
-        let i = 0;
-        // clean up tool handle from 
-        // last draw if exists and we are not hiding
-        if (this.lastEndPoint && !handleOpts.hide) {
-            ctx.clearRect(this.lastEndPoint.x - halfWidth - 1, this.lastEndPoint.y - halfWidth - 1, this.width + 2, this.width + 2);
-        }
-        // clear all the way along the drag
-        while (i < length) {
-            const nextPoint = {
-                x: currentPoint.x + unitVect.x,
-                y: currentPoint.y + unitVect.y
-            };
-            ctx.clearRect(nextPoint.x - halfWidth, nextPoint.y - halfWidth, this.width, this.width);
-            i++;
-            currentPoint = nextPoint;
-        }
-        // if not the last part, then draw
-        // the tool indicator at the endpoint
-        if (!isEnd) {
-            this.lastEndPoint = endPoint;
-            // draw handle
-            if (!handleOpts.hide) {
-                ctx.strokeStyle = handleOpts.strokeColor;
-                ctx.fillStyle = handleOpts.fillColor;
-                ctx.fillRect(endPoint.x - halfWidth, endPoint.y - halfWidth, this.width, this.width);
-                ctx.strokeRect(endPoint.x - halfWidth + 0.5, endPoint.y - halfWidth + 0.5, this.width - 1, this.width - 1);
+        strokeParts.forEach(strokePart => {
+            const { startPoint, endPoint, isEnd } = strokePart;
+            const length = util_1.getEuclidean(startPoint, endPoint);
+            const unitVect = util_1.getUnitVector(startPoint, endPoint);
+            let currentPoint = startPoint;
+            let i = 0;
+            // clear all the way along the drag
+            while (i < length) {
+                const nextPoint = {
+                    x: currentPoint.x + unitVect.x,
+                    y: currentPoint.y + unitVect.y
+                };
+                ctx.clearRect(nextPoint.x - halfWidth, nextPoint.y - halfWidth, this.width, this.width);
+                i++;
+                currentPoint = nextPoint;
             }
-        }
-        else {
-            this.lastEndPoint = null;
+        });
+        const lastPart = strokeParts[strokeParts.length - 1];
+        // if the end is not the last part, then draw
+        // the tool indicator at the endpoint
+        if (!lastPart.isEnd && !handleOpts.hide) {
+            ctx.strokeStyle = handleOpts.strokeColor;
+            ctx.fillStyle = handleOpts.fillColor;
+            ctx.fillRect(lastPart.endPoint.x - halfWidth, lastPart.endPoint.y - halfWidth, this.width, this.width);
+            ctx.strokeRect(lastPart.endPoint.x - halfWidth + 0.5, lastPart.endPoint.y - halfWidth + 0.5, this.width - 1, this.width - 1);
         }
     }
 }
@@ -626,7 +645,6 @@ exports.EraserTool = EraserTool;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const parseColor = __webpack_require__(7);
-const util_1 = __webpack_require__(0);
 class HighlighterTool {
     constructor(color = "yellow", width = 8, opacity = 0.3) {
         this.width = width;
@@ -638,46 +656,21 @@ class HighlighterTool {
     /**
      * Draws a "highlighter stroke" for all line segments
      * @param ctx
-     * @param strokePart
+     * @param strokeParts
      */
-    draw(ctx, strokePart) {
-        const { startPoint, endPoint, isStart, isEnd } = strokePart;
-        const { lastStrokePart } = this;
+    draw(ctx, strokeParts) {
+        const firstPart = strokeParts[0];
         ctx.beginPath();
-        if (lastStrokePart) {
-            // get the vector direction of last stroke
-            const lastUnitVec = util_1.getUnitVector(lastStrokePart.startPoint, lastStrokePart.endPoint);
-            const lastLength = util_1.getEuclidean(lastStrokePart.startPoint, lastStrokePart.endPoint);
-            const lastBufferAmount = Math.min(1.0, lastLength);
-            // move to the buffer point of last stroke
-            ctx.moveTo(endPoint.x - lastUnitVec.x * lastBufferAmount, endPoint.y - lastUnitVec.y * lastBufferAmount);
-            ctx.lineTo(startPoint.x, startPoint.y);
-            // only move to buffer
-            const nextUnitVec = util_1.getUnitVector(startPoint, endPoint);
-            const nextLength = util_1.getEuclidean(startPoint, endPoint);
-            const nextBufferAmount = Math.min(1.0, nextLength);
-            const bufferEndPoint = {
-                x: startPoint.x + nextUnitVec.x * (nextLength - nextBufferAmount),
-                y: startPoint.y + nextUnitVec.y * (nextLength - nextBufferAmount)
-            };
-            ctx.lineTo(bufferEndPoint.x, bufferEndPoint.y);
-        }
-        else {
-            ctx.moveTo(startPoint.x, startPoint.y);
-            ctx.lineTo(endPoint.x, endPoint.y);
-        }
         ctx.lineWidth = this.width;
         ctx.strokeStyle = this.color;
+        ctx.lineCap = "butt";
+        ctx.miterLimit = 1;
+        ctx.moveTo(firstPart.startPoint.x, firstPart.startPoint.y);
+        strokeParts.forEach(strokePart => {
+            const { endPoint } = strokePart;
+            ctx.lineTo(endPoint.x, endPoint.y);
+        });
         ctx.stroke();
-        // if this is the last part,
-        // remove the last stroke part
-        // ref as there will be no more
-        if (isEnd) {
-            this.lastStrokePart = null;
-        }
-        else {
-            this.lastStrokePart = strokePart;
-        }
     }
 }
 exports.HighlighterTool = HighlighterTool;

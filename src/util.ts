@@ -1,4 +1,4 @@
-import {IPoint} from "./types";
+import { IPoint } from "./types";
 
 /**
  * Get the distance between two points
@@ -19,16 +19,16 @@ export function getEuclidean(p1: IPoint, p2: IPoint): number {
  */
 export function getUnitVector(startPoint: IPoint, endPoint: IPoint): IPoint {
   const length = this.getEuclidean(startPoint, endPoint);
-    
+
   const dirVect = {
     x: endPoint.x - startPoint.x,
     y: endPoint.y - startPoint.y
   };
-  
+
   const unitVect: IPoint = {
     x: dirVect.x / length,
     y: dirVect.y / length
   };
-  
+
   return unitVect;
 }

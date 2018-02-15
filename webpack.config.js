@@ -4,7 +4,7 @@ module.exports = {
   output: {
     filename: "index.js",
     path: __dirname + "/lib/",
-    library: "Fingerpaint",
+    library: "Paintbricks",
     libraryTarget: "umd"
   },
 

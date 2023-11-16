@@ -1,8 +1,14 @@
 {
   "name": "paintbricks",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "An extendable drawing system built for the web.",
-  "exports": "./dist/index.esm.js",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    }
+  },
   "engines": {
     "node": " >=14.13.1 || >=16.0.0"
   },
@@ -15,7 +21,6 @@
     "prettier": "prettier --check \"{src,example/src}/**/*.{ts,json}\"",
     "prettier:fix": "prettier --write \"{src,example/src}/**/*.{ts,json}\""
   },
-  "typings": "src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tshaddix/paintbricks.git"

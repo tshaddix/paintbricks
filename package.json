@@ -11,7 +11,7 @@
     "build": "vite build",
     "build-example": "vite build --config example/vite.config.js",
     "prepublish": "npm run build",
-    "typecheck": "tsc --skipLibCheck",
+    "typecheck": "tsc --skipLibCheck --noEmit",
     "prettier": "prettier --check \"{src,example/src}/**/*.{ts,json}\"",
     "prettier:fix": "prettier --write \"{src,example/src}/**/*.{ts,json}\""
   },

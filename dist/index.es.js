@@ -514,7 +514,7 @@ function T(i, t) {
 }
 class R {
   constructor(t = "yellow", e = 8, s = 0.3) {
-    this.width = e, this.color = T(t, 0.4);
+    this.width = e, this.color = T(t, s);
   }
   /**
    * Draws a "highlighter stroke" for all line segments

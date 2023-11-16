@@ -2,8 +2,8 @@ import {
   Manager,
   PenTool,
   EraserTool,
-  HighlighterTool
-} from "../../lib";
+  HighlighterTool,
+} from "../../dist/index.es";
 
 window.onload = function () {
   const canvas = document.getElementById("canvas");
@@ -12,36 +12,46 @@ window.onload = function () {
   const eraserElem = document.getElementById("eraser");
   const highlighterElem = document.getElementById("highlighter");
   const clearElem = document.getElementById("clear");
-  
+
+  if (
+    !redPenElem ||
+    !bluePenElem ||
+    !eraserElem ||
+    !highlighterElem ||
+    !clearElem
+  ) {
+    throw new Error("Invalid elements");
+  }
+
   const width = 400;
   const height = 400;
-  
+
   const manager = new Manager(canvas, width, height);
-  
+
   const redPen = new PenTool("red", 3);
   const bluePen = new PenTool("blue", 8);
   const eraser = new EraserTool(20);
   const highlighterTool = new HighlighterTool("yellow", 30);
-  
+
   manager.setTool(redPen);
-  
-  redPenElem.onclick = function() {
+
+  redPenElem.onclick = function () {
     manager.setTool(redPen);
   };
-  
-  bluePenElem.onclick = function() {
+
+  bluePenElem.onclick = function () {
     manager.setTool(bluePen);
   };
-  
-  eraserElem.onclick = function() {
+
+  eraserElem.onclick = function () {
     manager.setTool(eraser);
   };
-  
-  highlighterElem.onclick = function() {
+
+  highlighterElem.onclick = function () {
     manager.setTool(highlighterTool);
   };
-  
-  clearElem.onclick = function() {
+
+  clearElem.onclick = function () {
     manager.clear();
   };
 };

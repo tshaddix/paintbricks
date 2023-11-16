@@ -37,16 +37,16 @@ export class StrokeManager {
     this.getRelativePosition = this.getRelativePosition.bind(this);
 
     this.canvas.addEventListener("touchstart", this.onTouchStart, {
-      passive: false
+      passive: false,
     });
     this.canvas.addEventListener("touchend", this.onTouchEnd, {
-      passive: false
+      passive: false,
     });
     this.canvas.addEventListener("touchcancel", this.onTouchCancel, {
-      passive: false
+      passive: false,
     });
     this.canvas.addEventListener("touchmove", this.onTouchMove, {
-      passive: false
+      passive: false,
     });
   }
 
@@ -81,7 +81,7 @@ export class StrokeManager {
 
     return {
       x: clientX - rect.left,
-      y: clientY - rect.top
+      y: clientY - rect.top,
     };
   }
 
@@ -106,7 +106,7 @@ export class StrokeManager {
     // save the touch
     this.lastTouch = {
       id: touch.identifier,
-      position: this.getRelativePosition(touch.clientX, touch.clientY)
+      position: this.getRelativePosition(touch.clientX, touch.clientY),
     };
   }
 
@@ -126,7 +126,7 @@ export class StrokeManager {
     const touches: TouchList = e.changedTouches;
 
     // find the current touch we are tracking
-    const touch: Touch = Array.from(touches).find(touch => {
+    const touch: Touch = Array.from(touches).find((touch) => {
       return touch.identifier === this.lastTouch.id;
     });
 
@@ -138,7 +138,7 @@ export class StrokeManager {
 
     const nextTouch: ITouch = {
       id: touch.identifier,
-      position: this.getRelativePosition(touch.clientX, touch.clientY)
+      position: this.getRelativePosition(touch.clientX, touch.clientY),
     };
 
     // If sensitivity setting has been set,
@@ -156,10 +156,10 @@ export class StrokeManager {
       endPoint: nextTouch.position,
       startPoint: this.lastTouch.position,
       isStart: this.lastStrokeParts.length === 0,
-      isEnd: false
+      isEnd: false,
     };
 
-    this.onStrokePartHandlers.forEach(handler => {
+    this.onStrokePartHandlers.forEach((handler) => {
       handler(strokePart);
     });
 
@@ -184,7 +184,7 @@ export class StrokeManager {
     const touches: TouchList = e.changedTouches;
 
     // find the current touch we are tracking
-    const touch: Touch = Array.from(touches).find(touch => {
+    const touch: Touch = Array.from(touches).find((touch) => {
       return touch.identifier === this.lastTouch.id;
     });
 
@@ -200,10 +200,10 @@ export class StrokeManager {
       startPoint: this.lastTouch.position,
       endPoint,
       isStart: false,
-      isEnd: true
+      isEnd: true,
     };
 
-    this.onStrokePartHandlers.forEach(handler => {
+    this.onStrokePartHandlers.forEach((handler) => {
       handler(strokePart);
     });
 

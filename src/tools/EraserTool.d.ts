@@ -8,7 +8,6 @@ export interface IHandleOptions {
 export declare class EraserTool {
     readonly width: number;
     readonly handleOpts: IHandleOptions;
-    private lastEndPoint;
     constructor(width?: number, handleOpts?: Partial<IHandleOptions>);
     /**
      * Draws an "eraser stroke" for all line segments

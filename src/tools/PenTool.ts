@@ -26,7 +26,7 @@ export class PenTool {
 
     ctx.moveTo(firstPart.startPoint.x, firstPart.startPoint.y);
 
-    strokeParts.forEach(strokePart => {
+    strokeParts.forEach((strokePart) => {
       const { endPoint } = strokePart;
       ctx.lineTo(endPoint.x, endPoint.y);
     });

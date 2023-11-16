@@ -28,28 +28,28 @@ export declare class StrokeManager {
      * @param clientY
      * @returns IPoint
      */
-    private getRelativePosition(clientX, clientY);
+    private getRelativePosition;
     /**
      * Creates a new touch if one does not
      * already exist
      * @param e
      */
-    private onTouchStart(e);
+    private onTouchStart;
     /**
      * Creates a line from last touch to current touch
      * point and emits event. Does no-op if no existing touch
      * @param e
      */
-    private onTouchMove(e);
+    private onTouchMove;
     /**
      * Draws a line from last point to final point. Removes
      * the reference to last touch point.
      * @param e
      */
-    private onTouchEnd(e);
+    private onTouchEnd;
     /**
      * Removes the current last touch point
      * @param e
      */
-    private onTouchCancel(e);
+    private onTouchCancel;
 }

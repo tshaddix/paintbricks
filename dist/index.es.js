@@ -1,25 +1,31 @@
-function g(e, t) {
-  return Math.sqrt(Math.pow(e.x - t.x, 2) + Math.pow(e.y - t.y, 2));
+function c(i, t) {
+  return Math.sqrt(Math.pow(i.x - t.x, 2) + Math.pow(i.y - t.y, 2));
 }
-function y(e, t) {
-  const i = g(e, t), o = {
-    x: t.x - e.x,
-    y: t.y - e.y
+function k(i, t) {
+  const e = c(i, t), s = {
+    x: t.x - i.x,
+    y: t.y - i.y
   };
   return {
-    x: o.x / i,
-    y: o.y / i
+    x: s.x / e,
+    y: s.y / e
   };
 }
-class k {
+class w {
   constructor(t) {
-    this.canvas = t, this.lastTouch = null, this.sensitivity = 20, this.lastStrokeParts = [], this.onStrokePartHandlers = [], this.onTouchStart = this.onTouchStart.bind(this), this.onTouchEnd = this.onTouchEnd.bind(this), this.onTouchCancel = this.onTouchCancel.bind(this), this.onTouchMove = this.onTouchMove.bind(this), this.destroy = this.destroy.bind(this), this.getRelativePosition = this.getRelativePosition.bind(this), this.canvas.addEventListener("touchstart", this.onTouchStart, {
+    this.canvas = t, this.lastTouch = null, this.lastMouse = null, this.sensitivity = 20, this.lastStrokeParts = [], this.onStrokePartHandlers = [], this.onTouchStart = this.onTouchStart.bind(this), this.onTouchEnd = this.onTouchEnd.bind(this), this.onTouchCancel = this.onTouchCancel.bind(this), this.onTouchMove = this.onTouchMove.bind(this), this.destroy = this.destroy.bind(this), this.getRelativePosition = this.getRelativePosition.bind(this), this.onMouseDown = this.onMouseDown.bind(this), this.onMouseUp = this.onMouseUp.bind(this), this.onMouseMove = this.onMouseMove.bind(this), this.canvas.addEventListener("touchstart", this.onTouchStart, {
       passive: !1
     }), this.canvas.addEventListener("touchend", this.onTouchEnd, {
       passive: !1
     }), this.canvas.addEventListener("touchcancel", this.onTouchCancel, {
       passive: !1
     }), this.canvas.addEventListener("touchmove", this.onTouchMove, {
+      passive: !1
+    }), this.canvas.addEventListener("mousedown", this.onMouseDown, {
+      passive: !1
+    }), document.addEventListener("mouseup", this.onMouseUp, {
+      passive: !1
+    }), this.canvas.addEventListener("mousemove", this.onMouseMove, {
       passive: !1
     });
   }
@@ -34,7 +40,7 @@ class k {
    * Removes all active listeners
    */
   destroy() {
-    this.onStrokePartHandlers = [], this.lastStrokeParts = [], this.canvas.removeEventListener("touchstart", this.onTouchStart), this.canvas.removeEventListener("touchend", this.onTouchEnd), this.canvas.removeEventListener("touchcancel", this.onTouchCancel), this.canvas.removeEventListener("touchmove", this.onTouchMove);
+    this.onStrokePartHandlers = [], this.lastStrokeParts = [], this.canvas.removeEventListener("touchstart", this.onTouchStart), this.canvas.removeEventListener("touchend", this.onTouchEnd), this.canvas.removeEventListener("touchcancel", this.onTouchCancel), this.canvas.removeEventListener("touchmove", this.onTouchMove), this.canvas.removeEventListener("mousedown", this.onMouseDown), document.removeEventListener("mouseup", this.onMouseUp), this.canvas.removeEventListener("mousemove", this.onMouseMove);
   }
   /**
    * Get relative position to canvas
@@ -42,11 +48,11 @@ class k {
    * @param clientY
    * @returns IPoint
    */
-  getRelativePosition(t, i) {
-    const o = this.canvas.getBoundingClientRect();
+  getRelativePosition(t, e) {
+    const s = this.canvas.getBoundingClientRect();
     return {
-      x: t - o.left,
-      y: i - o.top
+      x: (t - s.left) / s.width,
+      y: (e - s.top) / s.height
     };
   }
   /**
@@ -57,10 +63,10 @@ class k {
   onTouchStart(t) {
     if (t.preventDefault(), this.lastTouch)
       return;
-    const o = t.changedTouches.item(0);
+    const s = t.changedTouches.item(0);
     this.lastTouch = {
-      id: o.identifier,
-      position: this.getRelativePosition(o.clientX, o.clientY)
+      id: s.identifier,
+      position: this.getRelativePosition(s.clientX, s.clientY)
     };
   }
   /**
@@ -71,24 +77,24 @@ class k {
   onTouchMove(t) {
     if (t.preventDefault(), !this.lastTouch)
       return;
-    const i = t.changedTouches, o = Array.from(i).find((a) => a.identifier === this.lastTouch.id);
-    if (!o)
+    const e = t.changedTouches, s = Array.from(e).find((a) => a.identifier === this.lastTouch.id);
+    if (!s)
       return;
     const n = {
-      id: o.identifier,
-      position: this.getRelativePosition(o.clientX, o.clientY)
+      id: s.identifier,
+      position: this.getRelativePosition(s.clientX, s.clientY)
     };
-    if (this.sensitivity && g(n.position, this.lastTouch.position) < 10 / this.sensitivity)
+    if (this.sensitivity && c(n.position, this.lastTouch.position) < 10 / this.sensitivity)
       return;
-    const s = {
+    const o = {
       endPoint: n.position,
       startPoint: this.lastTouch.position,
       isStart: this.lastStrokeParts.length === 0,
       isEnd: !1
     };
     this.onStrokePartHandlers.forEach((a) => {
-      a(s);
-    }), this.lastTouch = n, this.lastStrokeParts.push(s);
+      a(o);
+    }), this.lastTouch = n, this.lastStrokeParts.push(o);
   }
   /**
    * Draws a line from last point to final point. Removes
@@ -98,17 +104,17 @@ class k {
   onTouchEnd(t) {
     if (t.preventDefault(), !this.lastTouch)
       return;
-    const i = t.changedTouches, o = Array.from(i).find((a) => a.identifier === this.lastTouch.id);
-    if (!o)
+    const e = t.changedTouches, s = Array.from(e).find((a) => a.identifier === this.lastTouch.id);
+    if (!s)
       return;
-    const n = this.getRelativePosition(o.clientX, o.clientY), s = {
+    const n = this.getRelativePosition(s.clientX, s.clientY), o = {
       startPoint: this.lastTouch.position,
       endPoint: n,
       isStart: !1,
       isEnd: !0
     };
     this.onStrokePartHandlers.forEach((a) => {
-      a(s);
+      a(o);
     }), this.lastTouch = null, this.lastStrokeParts = [];
   }
   /**
@@ -118,12 +124,49 @@ class k {
   onTouchCancel(t) {
     t.preventDefault(), this.lastTouch = null, this.lastStrokeParts = [];
   }
+  onMouseDown(t) {
+    this.lastMouse || (this.lastMouse = this.getRelativePosition(t.clientX, t.clientY));
+  }
+  onMouseUp(t) {
+    if (!this.lastMouse)
+      return;
+    let e = this.getRelativePosition(t.clientX, t.clientY);
+    c(this.lastMouse, e) < 1 && (e = {
+      x: this.lastMouse.x + 8e-4,
+      y: this.lastMouse.y + 8e-4
+    });
+    const n = {
+      startPoint: this.lastMouse,
+      endPoint: e,
+      isStart: !1,
+      isEnd: !0
+    };
+    this.onStrokePartHandlers.forEach((o) => {
+      o(n);
+    }), this.lastMouse = null, this.lastStrokeParts = [];
+  }
+  onMouseMove(t) {
+    if (!this.lastMouse)
+      return;
+    const e = this.getRelativePosition(t.clientX, t.clientY);
+    if (this.sensitivity && c(e, this.lastMouse) < 0.05 / this.sensitivity)
+      return;
+    const s = {
+      endPoint: e,
+      startPoint: this.lastMouse,
+      isStart: this.lastStrokeParts.length === 0,
+      isEnd: !1
+    };
+    this.onStrokePartHandlers.forEach((n) => {
+      n(s);
+    }), this.lastMouse = e, this.lastStrokeParts.push(s);
+  }
 }
-class P {
-  constructor(t, i, o) {
-    this.canvas = t, this.canvasWidth = i, this.canvasHeight = o, this.currentTool = null, this.currentStroke = [], this.strokeManager = new k(t), this.canvasState = null, this.shouldDraw = !1, this.shouldCommit = !1;
-    const n = t.getContext("2d").backingStorePixelRatio || 1, s = window.devicePixelRatio || 1;
-    this.pixelRatio = s / n, this.setCanvasSize = this.setCanvasSize.bind(this), this.setTool = this.setTool.bind(this), this.destroy = this.destroy.bind(this), this.clear = this.clear.bind(this), this.draw = this.draw.bind(this), this.onStrokePart = this.onStrokePart.bind(this), this.nextAnimationFrame = window.requestAnimationFrame(this.draw), this.strokeManager.onStrokePart(this.onStrokePart), this.setCanvasSize(i, o);
+class M {
+  constructor(t, e, s) {
+    this.canvas = t, this.ctx = t.getContext("2d", { willReadFrequently: !0 }), this.canvasWidth = e, this.canvasHeight = s, this.currentTool = null, this.currentStroke = [], this.strokeManager = new w(t), this.canvasState = null, this.shouldDraw = !1, this.shouldCommit = !1;
+    const n = this.ctx.backingStorePixelRatio || 1, o = window.devicePixelRatio || 1;
+    this.pixelRatio = o / n, this.setCanvasSize = this.setCanvasSize.bind(this), this.setTool = this.setTool.bind(this), this.destroy = this.destroy.bind(this), this.clear = this.clear.bind(this), this.draw = this.draw.bind(this), this.onStrokePart = this.onStrokePart.bind(this), this.nextAnimationFrame = window.requestAnimationFrame(this.draw), this.strokeManager.onStrokePart(this.onStrokePart), this.setCanvasSize(e, s);
   }
   /**
    * Sets the canvas desired width and height and sets transform
@@ -131,10 +174,10 @@ class P {
    * @param width
    * @param height
    */
-  setCanvasSize(t, i) {
-    this.canvasWidth = t, this.canvasHeight = i;
-    const { canvas: o, canvasWidth: n, canvasHeight: s, pixelRatio: a } = this, h = o.getContext("2d");
-    o.width = n * a, o.height = s * a, o.style.width = n + "px", o.style.height = s + "px", h.setTransform(a, 0, 0, a, 0, 0);
+  setCanvasSize(t, e) {
+    this.canvasWidth = t, this.canvasHeight = e;
+    const { ctx: s, canvas: n, canvasWidth: o, canvasHeight: a, pixelRatio: r } = this;
+    s && (n.width = o * r, n.height = a * r, n.style.width = o + "px", n.style.height = a + "px", s.scale(r, r));
   }
   /**
    * Sets the current tool for the manager
@@ -168,39 +211,42 @@ class P {
    */
   draw() {
     this.nextAnimationFrame = window.requestAnimationFrame(this.draw);
-    const t = this.canvas.getContext("2d");
-    this.shouldDraw && (t.clearRect(0, 0, this.canvasWidth, this.canvasHeight), this.canvasState && t.putImageData(this.canvasState, 0, 0), this.currentTool && this.currentStroke.length && (t.save(), this.currentTool.draw(t, this.currentStroke), t.restore()), this.shouldCommit && (this.canvasState = t.getImageData(
+    const { ctx: t, canvasWidth: e, canvasHeight: s } = this;
+    !this.shouldDraw || !t || (t.clearRect(0, 0, this.canvasWidth, this.canvasHeight), this.canvasState && t.putImageData(this.canvasState, 0, 0), this.currentTool && this.currentStroke.length && (t.save(), this.currentTool.draw(t, this.currentStroke, e, s), t.restore()), this.shouldCommit && (this.canvasState = t.getImageData(
       0,
       0,
-      this.canvasWidth * this.pixelRatio,
-      this.canvasHeight * this.pixelRatio
+      e * this.pixelRatio,
+      s * this.pixelRatio
     ), this.currentStroke = [], this.shouldCommit = !1), this.shouldDraw = !1);
   }
 }
-class C {
-  constructor(t = "red", i = 3) {
-    this.color = t, this.width = i;
+class E {
+  constructor(t = "red", e = 3) {
+    this.color = t, this.width = e;
   }
   /**
    * Draws a "pen stroke" for all line segments
    * @param ctx
    * @param strokeParts
    */
-  draw(t, i) {
-    const o = i[0];
-    t.beginPath(), t.lineWidth = this.width, t.strokeStyle = this.color, t.lineCap = "round", t.lineJoin = "round", t.moveTo(o.startPoint.x, o.startPoint.y), i.forEach((n) => {
-      const { endPoint: s } = n;
-      t.lineTo(s.x, s.y);
+  draw(t, e, s, n) {
+    const o = e[0];
+    t.beginPath(), t.lineWidth = this.width, t.strokeStyle = this.color, t.lineCap = "round", t.lineJoin = "round", t.moveTo(
+      o.startPoint.x * s,
+      o.startPoint.y * n
+    ), e.forEach((a) => {
+      const { endPoint: r } = a;
+      t.lineTo(r.x * s, r.y * n);
     }), t.stroke();
   }
 }
-class E {
-  constructor(t = 10, i) {
-    this.width = t, i = i || {}, this.handleOpts = {
-      hide: i.hide || !1,
-      strokeWidth: i.strokeWidth || 2,
-      fillColor: i.fillColor || "white",
-      strokeColor: i.strokeColor || "black"
+class C {
+  constructor(t = 10, e) {
+    this.width = t, e = e || {}, this.handleOpts = {
+      hide: e.hide || !1,
+      strokeWidth: e.strokeWidth || 2,
+      fillColor: e.fillColor || "white",
+      strokeColor: e.strokeColor || "black"
     };
   }
   /**
@@ -208,42 +254,49 @@ class E {
    * @param ctx
    * @param strokeParts
    */
-  draw(t, i) {
-    const { handleOpts: o } = this, n = this.width / 2;
-    i.forEach((a) => {
-      const { startPoint: h, endPoint: l, isEnd: f } = a, d = g(h, l), v = y(h, l);
-      let r = h, u = 0;
-      for (; u < d; ) {
-        const c = {
-          x: r.x + v.x,
-          y: r.y + v.y
+  draw(t, e, s, n) {
+    const { handleOpts: o } = this, a = this.width / 2;
+    e.forEach((l) => {
+      const { startPoint: d, endPoint: g } = l, y = c(d, g), h = k(d, g);
+      let u = d, f = 0;
+      for (; f < y; ) {
+        const v = {
+          x: u.x * s + h.x,
+          y: u.y * n + h.y
         };
         t.clearRect(
-          c.x - n,
-          c.y - n,
+          v.x - a,
+          v.y - a,
           this.width,
           this.width
-        ), u++, r = c;
+        ), f++, u = v;
       }
     });
-    const s = i[i.length - 1];
-    !s.isEnd && !o.hide && (t.strokeStyle = o.strokeColor, t.fillStyle = o.fillColor, t.fillRect(
-      s.endPoint.x - n,
-      s.endPoint.y - n,
-      this.width,
-      this.width
-    ), t.strokeRect(
-      s.endPoint.x - n + 0.5,
-      s.endPoint.y - n + 0.5,
-      this.width - 1,
-      this.width - 1
-    ));
+    const r = e[e.length - 1];
+    if (!r.isEnd && !o.hide) {
+      t.strokeStyle = o.strokeColor, t.fillStyle = o.fillColor;
+      const l = {
+        x: r.endPoint.x * s,
+        y: r.endPoint.y * n
+      };
+      t.fillRect(
+        l.x - a,
+        l.y - a,
+        this.width,
+        this.width
+      ), t.strokeRect(
+        l.x - a + 0.5,
+        l.y - a + 0.5,
+        this.width - 1,
+        this.width - 1
+      );
+    }
   }
 }
-function w(e) {
-  return e && e.__esModule && Object.prototype.hasOwnProperty.call(e, "default") ? e.default : e;
+function b(i) {
+  return i && i.__esModule && Object.prototype.hasOwnProperty.call(i, "default") ? i.default : i;
 }
-var b = {
+var P = {
   aliceblue: [240, 248, 255],
   antiquewhite: [250, 235, 215],
   aqua: [0, 255, 255],
@@ -393,7 +446,7 @@ var b = {
   yellow: [255, 255, 0],
   yellowgreen: [154, 205, 50]
 };
-const p = /* @__PURE__ */ w(b);
+const p = /* @__PURE__ */ b(P);
 var m = {
   red: 0,
   orange: 60,
@@ -402,84 +455,87 @@ var m = {
   blue: 240,
   purple: 300
 };
-function T(e) {
-  var t, i = [], o = 1, n;
-  if (typeof e == "string")
-    if (e = e.toLowerCase(), p[e])
-      i = p[e].slice(), n = "rgb";
-    else if (e === "transparent")
-      o = 0, n = "rgb", i = [0, 0, 0];
-    else if (/^#[A-Fa-f0-9]+$/.test(e)) {
-      var s = e.slice(1), a = s.length, h = a <= 4;
-      o = 1, h ? (i = [
-        parseInt(s[0] + s[0], 16),
-        parseInt(s[1] + s[1], 16),
-        parseInt(s[2] + s[2], 16)
-      ], a === 4 && (o = parseInt(s[3] + s[3], 16) / 255)) : (i = [
-        parseInt(s[0] + s[1], 16),
-        parseInt(s[2] + s[3], 16),
-        parseInt(s[4] + s[5], 16)
-      ], a === 8 && (o = parseInt(s[6] + s[7], 16) / 255)), i[0] || (i[0] = 0), i[1] || (i[1] = 0), i[2] || (i[2] = 0), n = "rgb";
-    } else if (t = /^((?:rgb|hs[lvb]|hwb|cmyk?|xy[zy]|gray|lab|lchu?v?|[ly]uv|lms)a?)\s*\(([^\)]*)\)/.exec(e)) {
-      var l = t[1], f = l === "rgb", s = l.replace(/a$/, "");
-      n = s;
-      var a = s === "cmyk" ? 4 : s === "gray" ? 1 : 3;
-      i = t[2].trim().split(/\s*[,\/]\s*|\s+/).map(function(r, u) {
-        if (/%$/.test(r))
-          return u === a ? parseFloat(r) / 100 : s === "rgb" ? parseFloat(r) * 255 / 100 : parseFloat(r);
-        if (s[u] === "h") {
-          if (/deg$/.test(r))
-            return parseFloat(r);
-          if (m[r] !== void 0)
-            return m[r];
+function S(i) {
+  var t, e = [], s = 1, n;
+  if (typeof i == "string")
+    if (i = i.toLowerCase(), p[i])
+      e = p[i].slice(), n = "rgb";
+    else if (i === "transparent")
+      s = 0, n = "rgb", e = [0, 0, 0];
+    else if (/^#[A-Fa-f0-9]+$/.test(i)) {
+      var o = i.slice(1), a = o.length, r = a <= 4;
+      s = 1, r ? (e = [
+        parseInt(o[0] + o[0], 16),
+        parseInt(o[1] + o[1], 16),
+        parseInt(o[2] + o[2], 16)
+      ], a === 4 && (s = parseInt(o[3] + o[3], 16) / 255)) : (e = [
+        parseInt(o[0] + o[1], 16),
+        parseInt(o[2] + o[3], 16),
+        parseInt(o[4] + o[5], 16)
+      ], a === 8 && (s = parseInt(o[6] + o[7], 16) / 255)), e[0] || (e[0] = 0), e[1] || (e[1] = 0), e[2] || (e[2] = 0), n = "rgb";
+    } else if (t = /^((?:rgb|hs[lvb]|hwb|cmyk?|xy[zy]|gray|lab|lchu?v?|[ly]uv|lms)a?)\s*\(([^\)]*)\)/.exec(i)) {
+      var l = t[1], d = l === "rgb", o = l.replace(/a$/, "");
+      n = o;
+      var a = o === "cmyk" ? 4 : o === "gray" ? 1 : 3;
+      e = t[2].trim().split(/\s*[,\/]\s*|\s+/).map(function(h, u) {
+        if (/%$/.test(h))
+          return u === a ? parseFloat(h) / 100 : o === "rgb" ? parseFloat(h) * 255 / 100 : parseFloat(h);
+        if (o[u] === "h") {
+          if (/deg$/.test(h))
+            return parseFloat(h);
+          if (m[h] !== void 0)
+            return m[h];
         }
-        return parseFloat(r);
-      }), l === s && i.push(1), o = f || i[a] === void 0 ? 1 : i[a], i = i.slice(0, a);
+        return parseFloat(h);
+      }), l === o && e.push(1), s = d || e[a] === void 0 ? 1 : e[a], e = e.slice(0, a);
     } else
-      e.length > 10 && /[0-9](?:\s|\/)/.test(e) && (i = e.match(/([0-9]+)/g).map(function(d) {
-        return parseFloat(d);
-      }), n = e.match(/([a-z])/ig).join("").toLowerCase());
+      i.length > 10 && /[0-9](?:\s|\/)/.test(i) && (e = i.match(/([0-9]+)/g).map(function(g) {
+        return parseFloat(g);
+      }), n = i.match(/([a-z])/ig).join("").toLowerCase());
   else
-    isNaN(e) ? Array.isArray(e) || e.length ? (i = [e[0], e[1], e[2]], n = "rgb", o = e.length === 4 ? e[3] : 1) : e instanceof Object && (e.r != null || e.red != null || e.R != null ? (n = "rgb", i = [
-      e.r || e.red || e.R || 0,
-      e.g || e.green || e.G || 0,
-      e.b || e.blue || e.B || 0
-    ]) : (n = "hsl", i = [
-      e.h || e.hue || e.H || 0,
-      e.s || e.saturation || e.S || 0,
-      e.l || e.lightness || e.L || e.b || e.brightness
-    ]), o = e.a || e.alpha || e.opacity || 1, e.opacity != null && (o /= 100)) : (n = "rgb", i = [e >>> 16, (e & 65280) >>> 8, e & 255]);
+    isNaN(i) ? Array.isArray(i) || i.length ? (e = [i[0], i[1], i[2]], n = "rgb", s = i.length === 4 ? i[3] : 1) : i instanceof Object && (i.r != null || i.red != null || i.R != null ? (n = "rgb", e = [
+      i.r || i.red || i.R || 0,
+      i.g || i.green || i.G || 0,
+      i.b || i.blue || i.B || 0
+    ]) : (n = "hsl", e = [
+      i.h || i.hue || i.H || 0,
+      i.s || i.saturation || i.S || 0,
+      i.l || i.lightness || i.L || i.b || i.brightness
+    ]), s = i.a || i.alpha || i.opacity || 1, i.opacity != null && (s /= 100)) : (n = "rgb", e = [i >>> 16, (i & 65280) >>> 8, i & 255]);
   return {
     space: n,
-    values: i,
-    alpha: o
+    values: e,
+    alpha: s
   };
 }
-function S(e, t) {
-  var i = T(e);
-  return t == null && (t = i.alpha), i.space[0] === "h" ? i.space + ["a(", i.values[0], ",", i.values[1], "%,", i.values[2], "%,", t, ")"].join("") : i.space + ["a(", i.values, ",", t, ")"].join("");
+function T(i, t) {
+  var e = S(i);
+  return t == null && (t = e.alpha), e.space[0] === "h" ? e.space + ["a(", e.values[0], ",", e.values[1], "%,", e.values[2], "%,", t, ")"].join("") : e.space + ["a(", e.values, ",", t, ")"].join("");
 }
 class R {
-  constructor(t = "yellow", i = 8, o = 0.3) {
-    this.width = i, this.color = S(t, 0.4);
+  constructor(t = "yellow", e = 8, s = 0.3) {
+    this.width = e, this.color = T(t, 0.4);
   }
   /**
    * Draws a "highlighter stroke" for all line segments
    * @param ctx
    * @param strokeParts
    */
-  draw(t, i) {
-    const o = i[0];
-    t.beginPath(), t.lineWidth = this.width, t.strokeStyle = this.color, t.lineCap = "butt", t.miterLimit = 1, t.moveTo(o.startPoint.x, o.startPoint.y), i.forEach((n) => {
-      const { endPoint: s } = n;
-      t.lineTo(s.x, s.y);
+  draw(t, e, s, n) {
+    const o = e[0];
+    t.beginPath(), t.lineWidth = this.width, t.strokeStyle = this.color, t.lineCap = "butt", t.miterLimit = 1, t.moveTo(
+      o.startPoint.x * s,
+      o.startPoint.y * n
+    ), e.forEach((a) => {
+      const { endPoint: r } = a;
+      t.lineTo(r.x * s, r.y * n);
     }), t.stroke();
   }
 }
 export {
-  E as EraserTool,
+  C as EraserTool,
   R as HighlighterTool,
-  P as Manager,
-  C as PenTool
+  M as Manager,
+  E as PenTool
 };
 //# sourceMappingURL=index.es.js.map

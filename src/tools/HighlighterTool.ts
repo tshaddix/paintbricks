@@ -22,7 +22,12 @@ export class HighlighterTool {
    * @param ctx
    * @param strokeParts
    */
-  public draw(ctx: CanvasRenderingContext2D, strokeParts: IStrokePart[]): void {
+  public draw(
+    ctx: CanvasRenderingContext2D,
+    strokeParts: IStrokePart[],
+    canvasWidth: number,
+    canvasHeight: number,
+  ): void {
     const firstPart = strokeParts[0];
 
     ctx.beginPath();
@@ -32,11 +37,14 @@ export class HighlighterTool {
     ctx.lineCap = "butt";
     ctx.miterLimit = 1;
 
-    ctx.moveTo(firstPart.startPoint.x, firstPart.startPoint.y);
+    ctx.moveTo(
+      firstPart.startPoint.x * canvasWidth,
+      firstPart.startPoint.y * canvasHeight,
+    );
 
     strokeParts.forEach((strokePart) => {
       const { endPoint } = strokePart;
-      ctx.lineTo(endPoint.x, endPoint.y);
+      ctx.lineTo(endPoint.x * canvasWidth, endPoint.y * canvasHeight);
     });
 
     ctx.stroke();

@@ -14,5 +14,10 @@ export interface ILine {
 }
 
 export interface ITool {
-  draw(ctx: CanvasRenderingContext2D, strokeParts: IStrokePart[]): void;
+  draw(
+    ctx: CanvasRenderingContext2D,
+    strokeParts: IStrokePart[],
+    canvasWidth: number,
+    canvasHeight: number,
+  ): void;
 }

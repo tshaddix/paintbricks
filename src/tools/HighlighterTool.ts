@@ -1,24 +1,20 @@
-import * as parseColor from "parse-color";
+import alpha from "color-alpha";
 
-import { IStrokePart, IPoint } from "../types";
-import { getUnitVector, getEuclidean } from "../util";
+import { IStrokePart } from "../types";
 
 export class HighlighterTool {
   readonly color: string;
   readonly width: number;
-  private lastStrokePart: IStrokePart | null;
 
   constructor(
     color: string = "yellow",
     width: number = 8,
-    opacity: Number = 0.3
+    opacity: Number = 0.3,
   ) {
     this.width = width;
-    this.lastStrokePart = null;
 
-    // calculate rgba color w/ opacity
-    const { rgb } = parseColor(color);
-    this.color = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
+    // calculate color w/ opacity
+    this.color = alpha(color, 0.4);
   }
 
   /**
@@ -38,7 +34,7 @@ export class HighlighterTool {
 
     ctx.moveTo(firstPart.startPoint.x, firstPart.startPoint.y);
 
-    strokeParts.forEach(strokePart => {
+    strokeParts.forEach((strokePart) => {
       const { endPoint } = strokePart;
       ctx.lineTo(endPoint.x, endPoint.y);
     });

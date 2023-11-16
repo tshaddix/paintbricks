@@ -37,9 +37,9 @@ export declare class Manager {
      * array
      * @param strokePart
      */
-    private onStrokePart(strokePart);
+    private onStrokePart;
     /**
      * Draws a frame
      */
-    private draw();
+    private draw;
 }

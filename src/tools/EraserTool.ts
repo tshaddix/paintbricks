@@ -11,11 +11,9 @@ export interface IHandleOptions {
 export class EraserTool {
   readonly width: number;
   readonly handleOpts: IHandleOptions;
-  private lastEndPoint: IPoint | null;
 
   constructor(width: number = 10, handleOpts?: Partial<IHandleOptions>) {
     this.width = width;
-    this.lastEndPoint = null;
 
     handleOpts = handleOpts || {};
 
@@ -23,7 +21,7 @@ export class EraserTool {
       hide: handleOpts.hide || false,
       strokeWidth: handleOpts.strokeWidth || 2,
       fillColor: handleOpts.fillColor || "white",
-      strokeColor: handleOpts.strokeColor || "black"
+      strokeColor: handleOpts.strokeColor || "black",
     };
   }
 
@@ -36,7 +34,7 @@ export class EraserTool {
     const { handleOpts } = this;
     const halfWidth = this.width / 2.0;
 
-    strokeParts.forEach(strokePart => {
+    strokeParts.forEach((strokePart) => {
       const { startPoint, endPoint, isEnd } = strokePart;
 
       const length = getEuclidean(startPoint, endPoint);
@@ -48,14 +46,14 @@ export class EraserTool {
       while (i < length) {
         const nextPoint: IPoint = {
           x: currentPoint.x + unitVect.x,
-          y: currentPoint.y + unitVect.y
+          y: currentPoint.y + unitVect.y,
         };
 
         ctx.clearRect(
           nextPoint.x - halfWidth,
           nextPoint.y - halfWidth,
           this.width,
-          this.width
+          this.width,
         );
 
         i++;
@@ -75,14 +73,14 @@ export class EraserTool {
         lastPart.endPoint.x - halfWidth,
         lastPart.endPoint.y - halfWidth,
         this.width,
-        this.width
+        this.width,
       );
 
       ctx.strokeRect(
         lastPart.endPoint.x - halfWidth + 0.5,
         lastPart.endPoint.y - halfWidth + 0.5,
         this.width - 1,
-        this.width - 1
+        this.width - 1,
       );
     }
   }

@@ -1,4 +1,4 @@
-import { IPoint, IStrokePart, ITool } from "./types";
+import { IStrokePart, ITool } from "./types";
 import { StrokeManager } from "./StrokeManager";
 
 export class Manager {
@@ -29,7 +29,7 @@ export class Manager {
   constructor(
     canvas: HTMLCanvasElement,
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
   ) {
     this.canvas = canvas;
     this.canvasWidth = canvasWidth;
@@ -162,7 +162,7 @@ export class Manager {
         0,
         0,
         this.canvasWidth * this.pixelRatio,
-        this.canvasHeight * this.pixelRatio
+        this.canvasHeight * this.pixelRatio,
       );
       this.currentStroke = [];
       this.shouldCommit = false;

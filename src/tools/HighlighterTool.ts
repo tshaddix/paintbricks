@@ -9,12 +9,12 @@ export class HighlighterTool {
   constructor(
     color: string = "yellow",
     width: number = 8,
-    opacity: Number = 0.3,
+    opacity: number = 0.3,
   ) {
     this.width = width;
 
     // calculate color w/ opacity
-    this.color = alpha(color, 0.4);
+    this.color = alpha(color, opacity);
   }
 
   /**

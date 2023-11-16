@@ -4,6 +4,8 @@ import { StrokeManager } from "./StrokeManager";
 export class Manager {
   // reference to the canvas
   private canvas: HTMLCanvasElement;
+  // reference to canvas rendering context
+  private ctx: CanvasRenderingContext2D | null;
   // reference to stroke manager
   private strokeManager: StrokeManager;
   // holds the pixel ratio between canvas backing
@@ -32,6 +34,7 @@ export class Manager {
     canvasHeight: number,
   ) {
     this.canvas = canvas;
+    this.ctx = canvas.getContext("2d", { willReadFrequently: true });
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.currentTool = null;
@@ -42,7 +45,7 @@ export class Manager {
     this.shouldCommit = false;
 
     // find pixel ratio relative to backing store and device ratio
-    const bsr = (canvas.getContext("2d") as any).backingStorePixelRatio || 1;
+    const bsr = (this.ctx as any).backingStorePixelRatio || 1;
     const dpr = window.devicePixelRatio || 1;
     this.pixelRatio = dpr / bsr;
 
@@ -71,16 +74,16 @@ export class Manager {
     this.canvasWidth = width;
     this.canvasHeight = height;
 
-    const { canvas, canvasWidth, canvasHeight, pixelRatio } = this;
+    const { ctx, canvas, canvasWidth, canvasHeight, pixelRatio } = this;
 
-    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
     // appropriately scale canvas to map to device ratio
     canvas.width = canvasWidth * pixelRatio;
     canvas.height = canvasHeight * pixelRatio;
     canvas.style.width = canvasWidth + "px";
     canvas.style.height = canvasHeight + "px";
-    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    ctx.scale(pixelRatio, pixelRatio);
   }
 
   /**
@@ -133,9 +136,9 @@ export class Manager {
     // schedule next draw
     this.nextAnimationFrame = window.requestAnimationFrame(this.draw);
 
-    const ctx = this.canvas.getContext("2d");
+    const { ctx, canvasWidth, canvasHeight } = this;
 
-    if (!this.shouldDraw) {
+    if (!this.shouldDraw || !ctx) {
       return;
     }
 
@@ -151,7 +154,7 @@ export class Manager {
     // pending strokes, draw them
     if (this.currentTool && this.currentStroke.length) {
       ctx.save();
-      this.currentTool.draw(ctx, this.currentStroke);
+      this.currentTool.draw(ctx, this.currentStroke, canvasWidth, canvasHeight);
       ctx.restore();
     }
 
@@ -161,8 +164,8 @@ export class Manager {
       this.canvasState = ctx.getImageData(
         0,
         0,
-        this.canvasWidth * this.pixelRatio,
-        this.canvasHeight * this.pixelRatio,
+        canvasWidth * this.pixelRatio,
+        canvasHeight * this.pixelRatio,
       );
       this.currentStroke = [];
       this.shouldCommit = false;

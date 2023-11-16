@@ -30,12 +30,17 @@ export class EraserTool {
    * @param ctx
    * @param strokeParts
    */
-  public draw(ctx: CanvasRenderingContext2D, strokeParts: IStrokePart[]): void {
+  public draw(
+    ctx: CanvasRenderingContext2D,
+    strokeParts: IStrokePart[],
+    canvasWidth: number,
+    canvasHeight: number,
+  ): void {
     const { handleOpts } = this;
     const halfWidth = this.width / 2.0;
 
     strokeParts.forEach((strokePart) => {
-      const { startPoint, endPoint, isEnd } = strokePart;
+      const { startPoint, endPoint } = strokePart;
 
       const length = getEuclidean(startPoint, endPoint);
       const unitVect: IPoint = getUnitVector(startPoint, endPoint);
@@ -45,8 +50,8 @@ export class EraserTool {
       // clear all the way along the drag
       while (i < length) {
         const nextPoint: IPoint = {
-          x: currentPoint.x + unitVect.x,
-          y: currentPoint.y + unitVect.y,
+          x: currentPoint.x * canvasWidth + unitVect.x,
+          y: currentPoint.y * canvasHeight + unitVect.y,
         };
 
         ctx.clearRect(
@@ -69,16 +74,21 @@ export class EraserTool {
       ctx.strokeStyle = handleOpts.strokeColor;
       ctx.fillStyle = handleOpts.fillColor;
 
+      const lastEndPoint = {
+        x: lastPart.endPoint.x * canvasWidth,
+        y: lastPart.endPoint.y * canvasHeight,
+      };
+
       ctx.fillRect(
-        lastPart.endPoint.x - halfWidth,
-        lastPart.endPoint.y - halfWidth,
+        lastEndPoint.x - halfWidth,
+        lastEndPoint.y - halfWidth,
         this.width,
         this.width,
       );
 
       ctx.strokeRect(
-        lastPart.endPoint.x - halfWidth + 0.5,
-        lastPart.endPoint.y - halfWidth + 0.5,
+        lastEndPoint.x - halfWidth + 0.5,
+        lastEndPoint.y - halfWidth + 0.5,
         this.width - 1,
         this.width - 1,
       );

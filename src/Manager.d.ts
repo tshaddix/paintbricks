@@ -1,6 +1,7 @@
 import { ITool } from "./types";
 export declare class Manager {
     private canvas;
+    private ctx;
     private strokeManager;
     private pixelRatio;
     private canvasWidth;
@@ -11,6 +12,7 @@ export declare class Manager {
     private canvasState;
     private shouldDraw;
     private shouldCommit;
+    private onStateChangeHandlers;
     constructor(canvas: HTMLCanvasElement, canvasWidth: number, canvasHeight: number);
     /**
      * Sets the canvas desired width and height and sets transform
@@ -32,6 +34,16 @@ export declare class Manager {
      * Clears the canvas
      */
     clear(): void;
+    /**
+     * Get the current canvas state
+     * @returns ImageData | null
+     */
+    getCanvasState(): ImageData | null;
+    /**
+     * Add listener for state changes
+     * @param handler
+     */
+    onStateChange(handler: () => void): void;
     /**
      * Adds a new stroke part to the nextStrokes
      * array

@@ -9,6 +9,7 @@ export interface ITouch {
 export declare class StrokeManager {
     private canvas;
     private lastTouch;
+    private lastMouse;
     private sensitivity;
     private lastStrokeParts;
     private onStrokePartHandlers;
@@ -52,4 +53,7 @@ export declare class StrokeManager {
      * @param e
      */
     private onTouchCancel;
+    private onMouseDown;
+    private onMouseUp;
+    private onMouseMove;
 }

@@ -164,7 +164,7 @@ class w {
 }
 class M {
   constructor(t, e, s) {
-    this.canvas = t, this.ctx = t.getContext("2d", { willReadFrequently: !0 }), this.canvasWidth = e, this.canvasHeight = s, this.currentTool = null, this.currentStroke = [], this.strokeManager = new w(t), this.canvasState = null, this.shouldDraw = !1, this.shouldCommit = !1;
+    this.canvas = t, this.ctx = t.getContext("2d", { willReadFrequently: !0 }), this.canvasWidth = e, this.canvasHeight = s, this.currentTool = null, this.currentStroke = [], this.strokeManager = new w(t), this.canvasState = null, this.shouldDraw = !1, this.shouldCommit = !1, this.onStateChangeHandlers = [];
     const n = this.ctx.backingStorePixelRatio || 1, o = window.devicePixelRatio || 1;
     this.pixelRatio = o / n, this.setCanvasSize = this.setCanvasSize.bind(this), this.setTool = this.setTool.bind(this), this.destroy = this.destroy.bind(this), this.clear = this.clear.bind(this), this.draw = this.draw.bind(this), this.onStrokePart = this.onStrokePart.bind(this), this.nextAnimationFrame = window.requestAnimationFrame(this.draw), this.strokeManager.onStrokePart(this.onStrokePart), this.setCanvasSize(e, s);
   }
@@ -190,13 +190,27 @@ class M {
    * Remove all event listeners
    */
   destroy() {
-    window.cancelAnimationFrame(this.nextAnimationFrame), this.strokeManager.destroy();
+    window.cancelAnimationFrame(this.nextAnimationFrame), this.strokeManager.destroy(), this.onStateChangeHandlers = [];
   }
   /**
    * Clears the canvas
    */
   clear() {
     this.canvasState = null, this.currentStroke = [], this.shouldDraw = !0, this.shouldCommit = !0;
+  }
+  /**
+   * Get the current canvas state
+   * @returns ImageData | null
+   */
+  getCanvasState() {
+    return this.canvasState;
+  }
+  /**
+   * Add listener for state changes
+   * @param handler
+   */
+  onStateChange(t) {
+    this.onStateChangeHandlers.push(t);
   }
   /**
    * Adds a new stroke part to the nextStrokes
@@ -217,7 +231,7 @@ class M {
       0,
       e * this.pixelRatio,
       s * this.pixelRatio
-    ), this.currentStroke = [], this.shouldCommit = !1), this.shouldDraw = !1);
+    ), this.currentStroke = [], this.shouldCommit = !1, this.onStateChangeHandlers.forEach((n) => n())), this.shouldDraw = !1);
   }
 }
 class E {
@@ -296,7 +310,7 @@ class C {
 function b(i) {
   return i && i.__esModule && Object.prototype.hasOwnProperty.call(i, "default") ? i.default : i;
 }
-var P = {
+var S = {
   aliceblue: [240, 248, 255],
   antiquewhite: [250, 235, 215],
   aqua: [0, 255, 255],
@@ -446,7 +460,7 @@ var P = {
   yellow: [255, 255, 0],
   yellowgreen: [154, 205, 50]
 };
-const p = /* @__PURE__ */ b(P);
+const p = /* @__PURE__ */ b(S);
 var m = {
   red: 0,
   orange: 60,
@@ -455,7 +469,7 @@ var m = {
   blue: 240,
   purple: 300
 };
-function S(i) {
+function P(i) {
   var t, e = [], s = 1, n;
   if (typeof i == "string")
     if (i = i.toLowerCase(), p[i])
@@ -509,7 +523,7 @@ function S(i) {
   };
 }
 function T(i, t) {
-  var e = S(i);
+  var e = P(i);
   return t == null && (t = e.alpha), e.space[0] === "h" ? e.space + ["a(", e.values[0], ",", e.values[1], "%,", e.values[2], "%,", t, ")"].join("") : e.space + ["a(", e.values, ",", t, ")"].join("");
 }
 class R {

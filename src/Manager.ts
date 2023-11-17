@@ -27,6 +27,8 @@ export class Manager {
   private shouldDraw: boolean;
   // indicates whether canvas should commit its next draw state to current state
   private shouldCommit: boolean;
+  // holds handlers for canvas state changes
+  private onStateChangeHandlers: (() => void)[];
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -43,6 +45,7 @@ export class Manager {
     this.canvasState = null;
     this.shouldDraw = false;
     this.shouldCommit = false;
+    this.onStateChangeHandlers = [];
 
     // find pixel ratio relative to backing store and device ratio
     const bsr = (this.ctx as any).backingStorePixelRatio || 1;
@@ -102,6 +105,8 @@ export class Manager {
     window.cancelAnimationFrame(this.nextAnimationFrame);
     // remove all listeners on stroke manager
     this.strokeManager.destroy();
+    // remove all change listeners
+    this.onStateChangeHandlers = [];
   }
 
   /**
@@ -112,6 +117,22 @@ export class Manager {
     this.currentStroke = [];
     this.shouldDraw = true;
     this.shouldCommit = true;
+  }
+
+  /**
+   * Get the current canvas state
+   * @returns ImageData | null
+   */
+  public getCanvasState(): ImageData | null {
+    return this.canvasState;
+  }
+
+  /**
+   * Add listener for state changes
+   * @param handler
+   */
+  public onStateChange(handler: () => void): void {
+    this.onStateChangeHandlers.push(handler);
   }
 
   /**
@@ -169,6 +190,8 @@ export class Manager {
       );
       this.currentStroke = [];
       this.shouldCommit = false;
+
+      this.onStateChangeHandlers.forEach((handler) => handler());
     }
 
     this.shouldDraw = false;

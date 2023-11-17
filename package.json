@@ -1,6 +1,6 @@
 {
   "name": "paintbricks",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "An extendable drawing system built for the web.",
   "exports": {
     ".": {
@@ -14,7 +14,8 @@
   },
   "type": "module",
   "scripts": {
-    "build": "vite build",
+    "build": "npm run build-src && npm run build-example && tsc --emitDeclarationOnly",
+    "build-src": "vite build",
     "build-example": "vite build --config example/vite.config.js",
     "prepublish": "npm run build",
     "typecheck": "tsc --skipLibCheck --noEmit",

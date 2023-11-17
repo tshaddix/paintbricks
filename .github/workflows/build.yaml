@@ -22,4 +22,3 @@ jobs:
       - run: npm run typecheck
       - run: npm run prettier
       - run: npm run build
-      - run: npm run build-example

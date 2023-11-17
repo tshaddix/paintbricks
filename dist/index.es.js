@@ -206,6 +206,13 @@ class M {
     return this.canvasState;
   }
   /**
+   * Set the current canvas state
+   * @param data
+   */
+  setCanvasState(t) {
+    this.canvasState = t, this.shouldDraw = !0;
+  }
+  /**
    * Add listener for state changes
    * @param handler
    */
@@ -307,10 +314,10 @@ class C {
     }
   }
 }
-function b(i) {
+function S(i) {
   return i && i.__esModule && Object.prototype.hasOwnProperty.call(i, "default") ? i.default : i;
 }
-var S = {
+var b = {
   aliceblue: [240, 248, 255],
   antiquewhite: [250, 235, 215],
   aqua: [0, 255, 255],
@@ -460,7 +467,7 @@ var S = {
   yellow: [255, 255, 0],
   yellowgreen: [154, 205, 50]
 };
-const p = /* @__PURE__ */ b(S);
+const p = /* @__PURE__ */ S(b);
 var m = {
   red: 0,
   orange: 60,

@@ -40,6 +40,11 @@ export declare class Manager {
      */
     getCanvasState(): ImageData | null;
     /**
+     * Set the current canvas state
+     * @param data
+     */
+    setCanvasState(data: ImageData | null): void;
+    /**
      * Add listener for state changes
      * @param handler
      */

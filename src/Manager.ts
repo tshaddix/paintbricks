@@ -128,6 +128,15 @@ export class Manager {
   }
 
   /**
+   * Set the current canvas state
+   * @param data
+   */
+  public setCanvasState(data: ImageData | null): void {
+    this.canvasState = data;
+    this.shouldDraw = true;
+  }
+
+  /**
    * Add listener for state changes
    * @param handler
    */

@@ -176,8 +176,8 @@ class S {
    */
   setCanvasSize(t, e) {
     this.canvasWidth = t, this.canvasHeight = e;
-    const { ctx: n, canvas: o, canvasWidth: i, canvasHeight: a, pixelRatio: h } = this;
-    n && (o.width = i * h, o.height = a * h, o.style.width = i + "px", o.style.height = a + "px", n.scale(h, h));
+    const { ctx: n, canvas: o, canvasWidth: i, canvasHeight: a, pixelRatio: r } = this;
+    n && (o.width = i * r, o.height = a * r, o.style.width = i + "px", o.style.height = a + "px", n.scale(r, r));
   }
   /**
    * Sets the current tool for the manager
@@ -249,8 +249,8 @@ class y {
       i.startPoint.x * n,
       i.startPoint.y * o
     ), e.forEach((a) => {
-      const { endPoint: h } = a;
-      t.lineTo(h.x * n, h.y * o);
+      const { endPoint: r } = a;
+      t.lineTo(r.x * n, r.y * o);
     }), t.stroke();
   }
 }
@@ -270,8 +270,8 @@ class P {
    */
   draw(t, e, n, o) {
     const { handleOpts: i } = this, a = this.width / 2;
-    e.forEach((r) => {
-      const { startPoint: c, endPoint: u } = r, v = g(c, u), l = b(c, u);
+    e.forEach((h) => {
+      const { startPoint: c, endPoint: u } = h, v = g(c, u), l = b(c, u);
       let d = c, p = 0;
       for (; p < v; ) {
         const m = {
@@ -286,21 +286,21 @@ class P {
         ), p++, d = m;
       }
     });
-    const h = e[e.length - 1];
-    if (!h.isEnd && !i.hide) {
+    const r = e[e.length - 1];
+    if (!r.isEnd && !i.hide) {
       t.strokeStyle = i.strokeColor, t.fillStyle = i.fillColor;
-      const r = {
-        x: h.endPoint.x * n,
-        y: h.endPoint.y * o
+      const h = {
+        x: r.endPoint.x * n,
+        y: r.endPoint.y * o
       };
       t.fillRect(
-        r.x - a,
-        r.y - a,
+        h.x - a,
+        h.y - a,
         this.width,
         this.width
       ), t.strokeRect(
-        r.x - a + 0.5,
-        r.y - a + 0.5,
+        h.x - a + 0.5,
+        h.y - a + 0.5,
         this.width - 1,
         this.width - 1
       );
@@ -477,8 +477,8 @@ function M(s) {
     else if (s === "transparent")
       n = 0, o = "rgb", e = [0, 0, 0];
     else if (/^#[A-Fa-f0-9]+$/.test(s)) {
-      var i = s.slice(1), a = i.length, h = a <= 4;
-      n = 1, h ? (e = [
+      var i = s.slice(1), a = i.length, r = a <= 4;
+      n = 1, r ? (e = [
         parseInt(i[0] + i[0], 16),
         parseInt(i[1] + i[1], 16),
         parseInt(i[2] + i[2], 16)
@@ -488,7 +488,7 @@ function M(s) {
         parseInt(i[4] + i[5], 16)
       ], a === 8 && (n = parseInt(i[6] + i[7], 16) / 255)), e[0] || (e[0] = 0), e[1] || (e[1] = 0), e[2] || (e[2] = 0), o = "rgb";
     } else if (t = /^((?:rgb|hs[lvb]|hwb|cmyk?|xy[zy]|gray|lab|lchu?v?|[ly]uv|lms)a?)\s*\(([^\)]*)\)/.exec(s)) {
-      var r = t[1], c = r === "rgb", i = r.replace(/a$/, "");
+      var h = t[1], c = h === "rgb", i = h.replace(/a$/, "");
       o = i;
       var a = i === "cmyk" ? 4 : i === "gray" ? 1 : 3;
       e = t[2].trim().split(/\s*[,\/]\s*|\s+/).map(function(l, d) {
@@ -501,7 +501,7 @@ function M(s) {
             return k[l];
         }
         return parseFloat(l);
-      }), r === i && e.push(1), n = c || e[a] === void 0 ? 1 : e[a], e = e.slice(0, a);
+      }), h === i && e.push(1), n = c || e[a] === void 0 ? 1 : e[a], e = e.slice(0, a);
     } else
       s.length > 10 && /[0-9](?:\s|\/)/.test(s) && (e = s.match(/([0-9]+)/g).map(function(u) {
         return parseFloat(u);
@@ -541,8 +541,8 @@ class C {
       i.startPoint.x * n,
       i.startPoint.y * o
     ), e.forEach((a) => {
-      const { endPoint: h } = a;
-      t.lineTo(h.x * n, h.y * o);
+      const { endPoint: r } = a;
+      t.lineTo(r.x * n, r.y * o);
     }), t.stroke();
   }
 }
@@ -550,19 +550,17 @@ window.onload = function() {
   const s = document.getElementById("canvas"), t = document.getElementById("red-pen"), e = document.getElementById("blue-pen"), n = document.getElementById("eraser"), o = document.getElementById("highlighter"), i = document.getElementById("clear");
   if (!t || !e || !n || !o || !i)
     throw new Error("Invalid elements");
-  const a = 400, h = 400, r = new S(s, a, h), c = new y("red", 3), u = new y("blue", 8), v = new P(20), l = new C("yellow", 30);
-  r.setTool(c), t.onclick = function() {
-    r.setTool(c);
+  const a = 400, r = 400, h = new S(s, a, r), c = new y("red", 3), u = new y("blue", 8), v = new P(20), l = new C("yellow", 30);
+  h.setTool(c), t.onclick = function() {
+    h.setTool(c);
   }, e.onclick = function() {
-    r.setTool(u);
+    h.setTool(u);
   }, n.onclick = function() {
-    r.setTool(v);
+    h.setTool(v);
   }, o.onclick = function() {
-    r.setTool(l);
+    h.setTool(l);
   }, i.onclick = function() {
-    r.clear();
-  }, r.onStateChange(function() {
-    console.log(r.getCanvasState());
-  });
+    h.clear();
+  };
 };
 //# sourceMappingURL=example.es.js.map

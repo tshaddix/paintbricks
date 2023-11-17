@@ -1,6 +1,6 @@
 {
   "name": "paintbricks",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "An extendable drawing system built for the web.",
   "exports": {
     ".": {

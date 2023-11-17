@@ -206,6 +206,13 @@ class S {
     return this.canvasState;
   }
   /**
+   * Set the current canvas state
+   * @param data
+   */
+  setCanvasState(t) {
+    this.canvasState = t, this.shouldDraw = !0;
+  }
+  /**
    * Add listener for state changes
    * @param handler
    */
